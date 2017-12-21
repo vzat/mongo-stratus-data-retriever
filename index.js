@@ -38,6 +38,24 @@ app.use('/graphql', expressGraphQL(async (req, res, params) => ({
 })));
 
 app.listen(5000);
-console.log('Data Retriever running on port 5000');
+logger.log('info', 'Data Retriever running on port 5000');
 
-logger.log('info', 'dadasczx');
+const json = {
+                  type: "Query",
+                  fields: {
+                      test: {
+                          params: {},
+                          return: "String"
+                      },
+                      test2: {
+                          params: {
+                              id: "Int!",
+                              name: "String"
+                          },
+                          return: "[String]!"
+                      }
+                  }
+              }
+
+const graphqlSchema = require('./lib/graphql/schema');
+graphqlSchema.generate(json);
