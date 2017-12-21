@@ -1,0 +1,31 @@
+{
+  "name": "data-retriever",
+  "version": "1.0.0",
+  "description": "MongoDB Data Retriever",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mongodb",
+    "graphql"
+  ],
+  "author": "Vlad Zat",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.2",
+    "config": "^1.28.1",
+    "cors": "^2.8.4",
+    "express": "^4.16.2",
+    "express-graphql": "^0.6.11",
+    "graphql": "^0.12.3",
+    "mongodb": "^3.0.0-rc0",
+    "morgan": "^1.9.0",
+    "winston": "^2.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.13.1"
+  }
+}
