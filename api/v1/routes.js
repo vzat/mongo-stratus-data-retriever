@@ -2,7 +2,6 @@ const express = require('express');
 const expressGraphQL = require('express-graphql');
 const { buildSchema } = require('graphql');
 
-const expressAPI = require('../../lib/express-api.js');
 const graphqlSchema = require('../../lib/graphql/schema');
 const graphqlResolvers = require('../../lib/graphql/resolvers');
 const logger = require('../../lib/logger');
