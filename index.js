@@ -42,28 +42,40 @@ routes.put('/:database/schema', function (req, res) {
     const schema = buildSchema(graphqlSchema.generate(data));
     const rootValue = graphqlResolvers.generate(data);
 
-    removeRoute(app, '/api/v1/' + user + '/' + database);
+    console.log(app._router.stack.length);
+    for (let routeNo = 0 ; routeNo < app._router.stack.length ; routeNo++) {
+        const routes = app._router.stack[routeNo];
 
-    const options = {
-        method: 'GET',
-        uri: 'http://localhost:' + app.get('port') + '/api/v1/' + user + '/' + database,
-    };
+        if (routes.route !== undefined &&
+            routes.route.path === '/api/v1/' + user + '/' + database &&
+            (routes.route.methods.get !== undefined || routes.route.methods.post !== undefined)) {
 
-    new Promise(function (resolve, reject) {
-        request(options)
-            .then(function (body) {
-                logger.log('info', body.statusCode);
-            })
-            .catch(function (err) {
-                logger.log('info', err.statusCode);
+            app._router.stack.splice(routeNo, 1);
+            routeNo--;
+        }
 
-                if (err.statusCode == 404) {
-                    resolve();
-                }
-            });
+    }
+
+    app._router.stack.forEach(function (routes) {
+
+        if (routes.route !== undefined &&
+            routes.route.path === '/api/v1/' + user + '/' + database &&
+            (routes.route.methods.get !== undefined || routes.route.methods.post !== undefined)) {
+
+            console.log(routes);
+            console.log(Object.keys(routes));
+        }
     });
 
-    app.use('/api/v1/' + user + '/' + database, expressGraphQL({
+    app.get('/api/v1/' + user + '/' + database, expressGraphQL({
+        schema: schema,
+        rootValue: rootValue,
+
+        // Debug only
+        graphiql: true
+    }));
+
+    app.post('/api/v1/' + user + '/' + database, expressGraphQL({
         schema: schema,
         rootValue: rootValue,
 
@@ -74,6 +86,37 @@ routes.put('/:database/schema', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
 
     res.send(JSON.stringify({'error': 0}));
+
+    // const options = {
+    //     method: 'GET',
+    //     uri: 'http://localhost:' + app.get('port') + '/api/v1/' + user + '/' + database,
+    // };
+    //
+    // new Promise(function (resolve, reject) {
+    //     request(options)
+    //         .then(function (body) {
+    //             logger.log('info', body.statusCode);
+    //         })
+    //         .catch(function (err) {
+    //             logger.log('info', err.statusCode);
+    //
+    //             if (err.statusCode == 404) {
+    //                 resolve();
+    //             }
+    //         });
+    // });
+
+    // app.use('/api/v1/' + user + '/' + database, expressGraphQL({
+    //     schema: schema,
+    //     rootValue: rootValue,
+    //
+    //     // Debug only
+    //     graphiql: true
+    // }));
+    //
+    // res.setHeader('Content-Type', 'application/json');
+    //
+    // res.send(JSON.stringify({'error': 0}));
 });
 
 app.listen(app.get('port'), function () {
