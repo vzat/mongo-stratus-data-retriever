@@ -42,30 +42,16 @@ routes.put('/:database/schema', function (req, res) {
     const schema = buildSchema(graphqlSchema.generate(data));
     const rootValue = graphqlResolvers.generate(data);
 
-    console.log(app._router.stack.length);
     for (let routeNo = 0 ; routeNo < app._router.stack.length ; routeNo++) {
         const routes = app._router.stack[routeNo];
 
         if (routes.route !== undefined &&
-            routes.route.path === '/api/v1/' + user + '/' + database &&
-            (routes.route.methods.get !== undefined || routes.route.methods.post !== undefined)) {
+            routes.route.path === '/api/v1/' + user + '/' + database) {
 
             app._router.stack.splice(routeNo, 1);
             routeNo--;
         }
-
     }
-
-    app._router.stack.forEach(function (routes) {
-
-        if (routes.route !== undefined &&
-            routes.route.path === '/api/v1/' + user + '/' + database &&
-            (routes.route.methods.get !== undefined || routes.route.methods.post !== undefined)) {
-
-            console.log(routes);
-            console.log(Object.keys(routes));
-        }
-    });
 
     app.get('/api/v1/' + user + '/' + database, expressGraphQL({
         schema: schema,
