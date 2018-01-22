@@ -1,0 +1,17 @@
+type Test {
+    abc: String
+    wasd: String
+}
+
+type Document {
+    test: Test,
+    test2: String
+}
+
+type Collection {
+    getDocuments(id: String): [Document]
+}
+
+type Query {
+    getCollections(name: String): [Collection]
+}

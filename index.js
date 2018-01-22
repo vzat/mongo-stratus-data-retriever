@@ -43,10 +43,11 @@ routes.put('/:database/schema', function (req, res) {
     // graphqlResolvers.generatev2(data);
 
 
-
+    // Modify the json file so the Query and Mutation are at the end
+    // and the rest are in the correct order
     const schema = buildSchema(graphqlSchema.generatev2(data));
     const rootValue = graphqlResolvers.generatev2(data);
-    
+
     // Remove old route
     for (let routeNo = 0 ; routeNo < app._router.stack.length ; routeNo++) {
         const routes = app._router.stack[routeNo];
