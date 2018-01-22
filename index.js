@@ -10,7 +10,7 @@ const request = require('request-promise');
 const logger = require('./lib/logger');
 const routes = require('./api/v1/routes');
 const graphqlSchema = require('./lib/graphql/schema');
-const graphqlResolvers = require('./lib//graphql/resolvers');
+const graphqlResolvers = require('./lib/graphql/resolvers');
 
 const app = express();
 
@@ -39,9 +39,15 @@ routes.put('/:database/schema', function (req, res) {
 
     const user = getUser(token);
 
-    const schema = buildSchema(graphqlSchema.generate(data));
-    const rootValue = graphqlResolvers.generate(data);
+    // graphqlSchema.generatev2(data);
+    // graphqlResolvers.generatev2(data);
 
+
+
+    const schema = buildSchema(graphqlSchema.generatev2(data));
+    const rootValue = graphqlResolvers.generatev2(data);
+    
+    // Remove old route
     for (let routeNo = 0 ; routeNo < app._router.stack.length ; routeNo++) {
         const routes = app._router.stack[routeNo];
 
@@ -53,6 +59,7 @@ routes.put('/:database/schema', function (req, res) {
         }
     }
 
+    // Create routes
     app.get('/api/v1/' + user + '/' + database, expressGraphQL({
         schema: schema,
         rootValue: rootValue,
@@ -68,6 +75,8 @@ routes.put('/:database/schema', function (req, res) {
         // Debug only
         graphiql: true
     }));
+
+
 
     res.setHeader('Content-Type', 'application/json');
 
