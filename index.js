@@ -43,6 +43,7 @@ routes.put('/:database/schema', function (req, res) {
 
     // Modify the json file so the Query and Mutation are at the end
     // and the rest are in the correct order
+    // ! probably not needed as resolvers are done in the correct order
     const schema = buildSchema(graphqlSchema.generatev2(data));
     const rootValue = graphqlResolvers.generatev2(data);
 
