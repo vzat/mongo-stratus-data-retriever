@@ -13,5 +13,47 @@ type Collection {
 }
 
 type Query {
-    getCollections(name: String): [Collection]
+    getCollections(name: String!): Collection
+}
+
+
+
+{
+		"schema": {
+				"type Query": {
+						"getCollections": {
+								"params": {
+										"name": "String!"
+								},
+								"return": "Collection"
+						}
+				},
+				"type Collection": {
+						"getDocuments": {
+								"params": {
+										"_id": "String"
+								},
+								"return": "[Document]"
+						}
+				},
+				"type Document": {
+						"abc": {
+								"return": "String"
+						},
+						"qwe": {
+								"return": "QWE"
+						},
+						"wasd": {
+								"return": "String"
+						}
+				},
+			"type QWE": {
+					"test": {
+							"return": "String"
+					},
+					"test2": {
+							"return": "String"
+					}
+			}
+		}
 }
