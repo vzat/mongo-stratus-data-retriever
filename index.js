@@ -4,8 +4,6 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const expressGraphQL = require('express-graphql');
 const { buildSchema } = require('graphql');
-const removeRoute = require('express-remove-route');
-const request = require('request-promise');
 
 const logger = require('./lib/logger');
 const routes = require('./api/v1/routes');
