@@ -2,13 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const expressGraphQL = require('express-graphql');
-const { buildSchema } = require('graphql');
 
 const logger = require('./lib/logger');
 const routes = require('./api/v1/routes');
-const graphqlSchema = require('./lib/graphql/schema');
-const graphqlResolvers = require('./lib/graphql/resolvers');
+const graphqlGenerator = require('./lib/graphql-generator');
+const removeEndpoint = require('./lib/express-remove-endpoint');
 
 const app = express();
 
@@ -33,85 +31,17 @@ app.get('/', function (req, res) {
 routes.put('/:database/schema', function (req, res) {
     const database = req.params.database;
     const token = getToken(req.get('Authorization'));
-    const data = req.body.schema;
+    const schemaData = req.body.schema;
 
     const user = getUser(token);
 
-    // graphqlSchema.generatev2(data);
-    // graphqlResolvers.generatev2(data);
+    removeEndpoint(app, '/api/v1/' + user + '/' + database);
 
-
-    // Modify the json file so the Query and Mutation are at the end
-    // and the rest are in the correct order
-    // ! probably not needed as resolvers are done in the correct order
-    const schema = buildSchema(graphqlSchema.generatev2(data));
-    const rootValue = graphqlResolvers.generatev2(data);
-
-    // Remove old route
-    for (let routeNo = 0 ; routeNo < app._router.stack.length ; routeNo++) {
-        const routes = app._router.stack[routeNo];
-
-        if (routes.route !== undefined &&
-            routes.route.path === '/api/v1/' + user + '/' + database) {
-
-            app._router.stack.splice(routeNo, 1);
-            routeNo--;
-        }
-    }
-
-    // Create routes
-    app.get('/api/v1/' + user + '/' + database, expressGraphQL({
-        schema: schema,
-        rootValue: rootValue,
-
-        // Debug only
-        graphiql: true
-    }));
-
-    app.post('/api/v1/' + user + '/' + database, expressGraphQL({
-        schema: schema,
-        rootValue: rootValue,
-
-        // Debug only
-        graphiql: true
-    }));
-
-
+    graphqlGenerator.createEndpoint(app, '/api/v1/' + user + '/' + database, schemaData);
 
     res.setHeader('Content-Type', 'application/json');
 
     res.send(JSON.stringify({'error': 0}));
-
-    // const options = {
-    //     method: 'GET',
-    //     uri: 'http://localhost:' + app.get('port') + '/api/v1/' + user + '/' + database,
-    // };
-    //
-    // new Promise(function (resolve, reject) {
-    //     request(options)
-    //         .then(function (body) {
-    //             logger.log('info', body.statusCode);
-    //         })
-    //         .catch(function (err) {
-    //             logger.log('info', err.statusCode);
-    //
-    //             if (err.statusCode == 404) {
-    //                 resolve();
-    //             }
-    //         });
-    // });
-
-    // app.use('/api/v1/' + user + '/' + database, expressGraphQL({
-    //     schema: schema,
-    //     rootValue: rootValue,
-    //
-    //     // Debug only
-    //     graphiql: true
-    // }));
-    //
-    // res.setHeader('Content-Type', 'application/json');
-    //
-    // res.send(JSON.stringify({'error': 0}));
 });
 
 app.listen(app.get('port'), function () {
