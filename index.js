@@ -50,4 +50,11 @@ app.listen(app.get('port'), function () {
     app.use('/api/v1', routes);
 });
 
+const db = require('./lib/db.js');
+
+db.connectSysDB().then(() => {
+    logger.log('info', 'After?');
+    db.getDocument('mongodb://localhost:27017/mongoStratus', 'abc', '5a6ce262dbb5d8ce801f98f3', ['abc']);
+});
+
 module.exports = app;
