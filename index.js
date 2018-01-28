@@ -54,7 +54,14 @@ const db = require('./lib/db.js');
 
 db.connectSysDB().then(() => {
     logger.log('info', 'After?');
-    db.getDocument('mongodb://localhost:27017/mongoStratus', 'abc', '5a6ce262dbb5d8ce801f98f3', ['abc']);
+    // db.getDocument('mongodb://localhost:27017/mongoStratus', 'abc', '5a6ce262dbb5d8ce801f98f3', ['abc']);
+    // db.getDocuments('mongodb://localhost:27017/mongoStratus', 'abc', ['abc']);
+    const serverInfo = {
+        ip: 'localhost',
+        port: 27017,
+        name: 'mongoStratus'
+    }
+    db.getDocumentsv2(serverInfo, 'abc', {'abc': 'def'}, {'projection': {'abc': 1}});
 });
 
 module.exports = app;
