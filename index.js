@@ -2,19 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const OAuthServer = require('express-oauth-server');
 
 const logger = require('./lib/logger');
 const routes = require('./api/v1/routes');
 const graphqlGenerator = require('./lib/graphql-generator');
 const removeEndpoint = require('./lib/express-remove-endpoint');
-const OAuth2Model = require('./models/OAuth2Models.js');
 
 let app = express();
-
-app.oauth = new OAuthServer({
-    model: OAuth2Model
-});
 
 function getToken(data) {
     return 'abc123';
@@ -27,7 +21,6 @@ function getUser(token) {
 app.set('port', process.env.PORT || 5000);
 app.use(cors());
 app.use(bodyParser.json());
-app.use(app.oauth.authorize());
 app.use(morgan('combined'));
 
 // Debug only
@@ -44,7 +37,15 @@ routes.put('/:database/schema', function (req, res) {
 
     removeEndpoint(app, '/api/v1/' + user + '/' + database);
 
-    graphqlGenerator.createEndpoint(app, '/api/v1/' + user + '/' + database, schemaData);
+    const userData = {
+        username: getUser(token),
+        database: database,
+        token: token
+    };
+
+    graphqlGenerator.createEndpoint(app, '/api/v1/', userData, schemaData);
+
+    // graphqlGenerator.createEndpoint(app, '/api/v1/' + user + '/' + database, schemaData);
 
     res.setHeader('Content-Type', 'application/json');
 
