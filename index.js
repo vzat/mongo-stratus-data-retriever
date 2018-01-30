@@ -52,10 +52,10 @@ routes.put('/:database/schema', function (req, res) {
     res.send(JSON.stringify({'error': 0}));
 });
 
+app.use('/api/v1', routes);
+
 app.listen(app.get('port'), function () {
     logger.log('info', 'Data Retriever running on port ' + app.get('port'));
-
-    app.use('/api/v1', routes);
 });
 
 // const db = require('./lib/db.js');
