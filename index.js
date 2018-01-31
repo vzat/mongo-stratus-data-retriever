@@ -7,16 +7,21 @@ const logger = require('./lib/logger');
 const routes = require('./api/v1/routes');
 const graphqlGenerator = require('./lib/graphql-generator');
 const removeEndpoint = require('./lib/express-remove-endpoint');
+const utils = require('./lib/utils');
+const db = require('./lib/db');
 
 let app = express();
 
-function getToken(data) {
-    return 'abc123';
+async function getUser (token) {
+    const docs = await db.getDocumentsSysDB('accounts', {'token': token}, {'projection': {'username': 1}});
+
+    if (docs !== undefined && docs.length === 1) {
+        return docs[0].username;
+    }
+    return undefined;
 }
 
-function getUser(token) {
-    return 'jsmith';
-}
+db.connectSysDB();
 
 app.set('port', process.env.PORT || 5000);
 app.use(cors());
@@ -30,7 +35,7 @@ app.get('/', function (req, res) {
 
 routes.put('/:database/schema', function (req, res) {
     const database = req.params.database;
-    const token = getToken(req.get('Authorization'));
+    const token = utils.getToken(req.get('Authorization'));
     const schemaData = req.body.schema;
 
     const user = getUser(token);
@@ -45,8 +50,6 @@ routes.put('/:database/schema', function (req, res) {
 
     graphqlGenerator.createEndpoint(app, '/api/v1/', userData, schemaData);
 
-    // graphqlGenerator.createEndpoint(app, '/api/v1/' + user + '/' + database, schemaData);
-
     res.setHeader('Content-Type', 'application/json');
 
     res.send(JSON.stringify({'error': 0}));
@@ -57,6 +60,8 @@ app.use('/api/v1', routes);
 app.listen(app.get('port'), function () {
     logger.log('info', 'Data Retriever running on port ' + app.get('port'));
 });
+
+
 
 // const db = require('./lib/db.js');
 
