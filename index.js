@@ -15,7 +15,7 @@ function getToken(data) {
 }
 
 function getUser(token) {
-    return 'john';
+    return 'jsmith';
 }
 
 app.set('port', process.env.PORT || 5000);
