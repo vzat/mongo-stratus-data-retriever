@@ -72,4 +72,7 @@ app.listen(app.get('port'), function () {
 //     db.getDocumentsv2(serverInfo, 'abc', {'abc': 'def'}, {'projection': {'abc': 1}});
 // });
 
+// const utils = require('./lib/utils');
+// console.log(utils.getDBFromUrl('/api/v1/john/abc'));
+
 module.exports = app;
