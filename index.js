@@ -9,17 +9,19 @@ const graphqlGenerator = require('./lib/graphql-generator');
 const removeEndpoint = require('./lib/express-remove-endpoint');
 const utils = require('./lib/utils');
 const db = require('./lib/db');
+const authMiddleware = require('./lib/authMiddleware');
 
 let app = express();
 
-async function getUser (token) {
-    const docs = await db.getDocumentsSysDB('accounts', {'token': token}, {'projection': {'username': 1}});
-
-    if (docs !== undefined && docs.length === 1) {
-        return docs[0].username;
-    }
-    return undefined;
-}
+// async function getUser (token) {
+//     const docs = await db.getDocumentsSysDB('accounts', {'token': token}, {'projection': {'username': 1}});
+//
+//     if (docs !== undefined && docs.length === 1) {
+//         return docs[0].username;
+//     }
+//
+//     return undefined;
+// }
 
 db.connectSysDB();
 
@@ -33,27 +35,36 @@ app.get('/', function (req, res) {
     res.end('Data Retriever');
 });
 
-routes.put('/:database/schema', function (req, res) {
-    const database = req.params.database;
-    const token = utils.getToken(req.get('Authorization'));
-    const schemaData = req.body.schema;
-
-    const user = getUser(token);
-
-    removeEndpoint(app, '/api/v1/' + user + '/' + database);
-
-    const userData = {
-        username: getUser(token),
-        database: database,
-        token: token
-    };
-
-    graphqlGenerator.createEndpoint(app, '/api/v1/', userData, schemaData);
-
+routes.put('/:user/:database/schema', authMiddleware, async function (req, res) {
     res.setHeader('Content-Type', 'application/json');
 
-    res.send(JSON.stringify({'error': 0}));
+    try {
+        const database = req.params.database;
+        const user = req.params.user;
+        const token = utils.getToken(req.get('Authorization'));
+        const schemaData = req.body.schema;
+
+        // const user = await getUser(token);
+
+        removeEndpoint(app, '/api/v1/' + user + '/' + database);
+
+        const userData = {
+            username: user,
+            database: database,
+            token: token
+        };
+
+        graphqlGenerator.createEndpoint(app, '/api/v1/', userData, schemaData);
+
+        res.send(JSON.stringify({'error': 0}));
+    }
+    catch (e) {
+        logger.log('error', e);
+        res.send(JSON.stringify({'error': 1, 'errorMessage': e}));
+    }
 });
+
+// TODO: Add endpoint to change the API token
 
 app.use('/api/v1', routes);
 

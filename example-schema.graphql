@@ -61,10 +61,6 @@ type Query {
 
 {
     type Query {
-        databaseName: Database
-    }
-
-    type Database {
         getCollection1 (_id: ID, field1: String, field2: Int): [Collection1.Document]
         getCollection2 (_id: ID, field9: Int, field8: Boolean): [Collection2.Document]
     }
@@ -92,9 +88,6 @@ type Query {
 {
     "schema": {
         "Query": {
-            "databaseName": "Database"
-        },
-        "Database": {
             "collection1": "[Collection1.Document]",
             "collection2": "[Collection2.Document]"
         }
