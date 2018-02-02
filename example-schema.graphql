@@ -90,7 +90,7 @@ type Query {
         "Query": {
             "collection1": "[Collection1.Document]",
             "collection2": "[Collection2.Document]"
-        }
+        },
         "Collection1.Document": {
             "_id": "ID",
             "field1": "String",
@@ -98,13 +98,13 @@ type Query {
             "field3": "Test"
         },
         "Test": {
-            "test1": String,
-            "test2": String
+            "test1": "String",
+            "test2": "String"
         },
         "Collection2.Document": {
-            "_id": ID,
-            "field9": Int,
-            "field8": Boolean
+            "_id": "ID",
+            "field9": "Int",
+            "field8": "Boolean"
         }
     }
 }
