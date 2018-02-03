@@ -75,30 +75,30 @@ app.listen(app.get('port'), function () {
 
 
 // Testing new resolver generating functions
-const tempSchema = {
-    "Query": {
-        "collection1": "[Collection1.Document]",
-        "collection2": "[Collection2.Document]"
-    },
-    "Collection1.Document": {
-        "_id": "ID",
-        "field1": "String",
-        "field2": "Int",
-        "field3": "Test"
-    },
-    "Test": {
-        "test1": "String",
-        "test2": "String"
-    },
-    "Collection2.Document": {
-        "_id": "ID",
-        "field9": "Int",
-        "field8": "Boolean"
-    }
-};
+// const tempSchema = {
+//     "Query": {
+//         "collection1": "[Collection1.Document]",
+//         "collection2": "[Collection2.Document]"
+//     },
+//     "Collection1.Document": {
+//         "_id": "ID",
+//         "field1": "String",
+//         "field2": "Int",
+//         "field3": "Test"
+//     },
+//     "Test": {
+//         "test1": "String",
+//         "test2": "String"
+//     },
+//     "Collection2.Document": {
+//         "_id": "ID",
+//         "field9": "Int",
+//         "field8": "Boolean"
+//     }
+// };
 
-const resolversv2 = require('./lib/graphql-generator/resolversv2');
-resolversv2.generate(tempSchema);
+// const resolversv2 = require('./lib/graphql-generator/resolversv2');
+// resolversv2.generate(tempSchema);
 
 
 // const db = require('./lib/db.js');
