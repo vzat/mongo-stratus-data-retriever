@@ -3,3 +3,7 @@ node_js:
   - "8"
 
 warnings_are_errors: false
+
+scripts:
+  - npm run lint
+  - npm test
