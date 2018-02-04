@@ -3,20 +3,13 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 
+let app = express();
+
 const logger = require('./lib/logger');
-const routes = require('./api/v1/routes');
-const graphqlGenerator = require('./lib/graphql-generator');
-const removeEndpoint = require('./lib/express-remove-endpoint');
+const routes = require('./api/v1/routes')(app);
+const db = require('./lib/db');
 
-const app = express();
-
-function getToken(data) {
-    return 'abc123';
-}
-
-function getUser(token) {
-    return 'john';
-}
+db.connectSysDB();
 
 app.set('port', process.env.PORT || 5000);
 app.use(cors());
@@ -28,26 +21,10 @@ app.get('/', function (req, res) {
     res.end('Data Retriever');
 });
 
-routes.put('/:database/schema', function (req, res) {
-    const database = req.params.database;
-    const token = getToken(req.get('Authorization'));
-    const schemaData = req.body.schema;
-
-    const user = getUser(token);
-
-    removeEndpoint(app, '/api/v1/' + user + '/' + database);
-
-    graphqlGenerator.createEndpoint(app, '/api/v1/' + user + '/' + database, schemaData);
-
-    res.setHeader('Content-Type', 'application/json');
-
-    res.send(JSON.stringify({'error': 0}));
-});
+app.use('/api/v1', routes);
 
 app.listen(app.get('port'), function () {
     logger.log('info', 'Data Retriever running on port ' + app.get('port'));
-
-    app.use('/api/v1', routes);
 });
 
 module.exports = app;
