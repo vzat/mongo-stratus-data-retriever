@@ -37,7 +37,7 @@ describe('utils', () => {
     });
 
     describe('getSysDBInfo()', () => {
-        it('should return data from config', () => {
+        it('should return system database connection info from config', () => {
             const sysDBInfo = utils.getSysDBInfo();
 
             expect(sysDBInfo.ip).to.be.equal(config.db.ip);
@@ -56,10 +56,8 @@ describe('utils', () => {
     });
 
     describe('isGraphQLScalar(scalar)', () => {
-        it('should return either boolean', () => {
+        it('should return boolean', () => {
             expect(utils.isGraphQLScalar('scalar')).to.be.a('boolean');
         });
     });
 });
-
-// describe('getUserFromUrl')
