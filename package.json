@@ -1,6 +1,6 @@
 {
   "name": "data-retriever",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "MongoDB Data Retriever",
   "main": "index.js",
   "scripts": {
