@@ -11,7 +11,7 @@ MongoStratus Data Retriever Server
 
 | Command | Returns | Description |
 | :------ | :------ | :---------- |
-| `get{CName} (query: {QDoc})` | [{MDoc]] | Multiple Documents based on `query` |
-| `insert{CName} (doc: {MDoc})` | {MDoc} | Document Inserted |
-| `delete{CName} (filter: {QDoc})` | {MDoc} | Document Removed |
-| `update{CName} (filter: {QDoc}, update: {MDoc))` | {MDoc} | Document before Update |
+| `get{CName} (query: {QDoc})` | [{MDoc]] | Returns multiple Documents based on the `query` |
+| `insert{CName} (doc: [{MDoc}])` | [{MDoc}] | Inserts multiple Documents and returns them |
+| `delete{CName} (filter: {QDoc})` | [{MDoc}] | Removes multiple Documents and returns them |
+| `update{CName} (filter: {QDoc}, update: {MDoc))` | [{MDoc}] | Updates multiple Documents and returns the Documents in their initial state |
