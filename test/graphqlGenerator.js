@@ -47,12 +47,12 @@ type Collection2_Document {
 type Mutation {
 \tinsertCollection1(_id: ID, field1: String, field2: Int, field3: TestInput): Collection1_Document
 \tdeleteCollection1(_id: ID, field1: String, field2: Int): Collection1_Document
-\tupdateCollection1(filter: Collection1_documentInput, update: Collection1_documentInput): Collection1_Document
+\tupdateCollection1(filter: Collection1_DocumentInput, update: Collection1_DocumentInput): Collection1_Document
 \tinsertCollection2(_id: ID, field9: Int, field8: Boolean): Collection2_Document
 \tdeleteCollection2(_id: ID, field9: Int, field8: Boolean): Collection2_Document
-\tupdateCollection2(filter: Collection2_documentInput, update: Collection2_documentInput): Collection2_Document
+\tupdateCollection2(filter: Collection2_DocumentInput, update: Collection2_DocumentInput): Collection2_Document
 }
-input Collection1_documentInput {
+input Collection1_DocumentInput {
 \t_id: ID
 \tfield1: String
 \tfield2: Int
@@ -62,7 +62,7 @@ input TestInput {
 \ttest1: String
 \ttest2: String
 }
-input Collection2_documentInput {
+input Collection2_DocumentInput {
 \t_id: ID
 \tfield9: Int
 \tfield8: Boolean
