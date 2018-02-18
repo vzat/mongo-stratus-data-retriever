@@ -9,12 +9,12 @@ const authMiddleware = require('../../lib/authMiddleware');
 
 const router = express.Router();
 
-async function addSchemaToSysDB (username, dbName, schemaData) {
+async function addSchemaToSysDB (username, serverName, dbName, schemaData) {
     try {
         const docs = await db.getDocumentsSysDB('accounts', {'username': username});
 
         for (const dNo in docs[0].databases) {
-            if (docs[0].databases[dNo].name === dbName) {
+            if (docs[0].databases[dNo].serverName === serverName && docs[0].databases[dNo].name === dbName) {
                 docs[0].databases[dNo].schema = JSON.stringify(schemaData);
             }
         }
@@ -27,22 +27,24 @@ async function addSchemaToSysDB (username, dbName, schemaData) {
 }
 
 const routes = function (app) {
-    router.put('/:user/:database/schema', authMiddleware, async function (req, res) {
+    router.put('/:user/:server/:database/schema', authMiddleware, async function (req, res) {
         res.setHeader('Content-Type', 'application/json');
 
         try {
+            const server = req.params.server;
             const database = req.params.database;
             const user = req.params.user;
             const token = utils.getToken(req.get('Authorization'));
             const schemaData = req.body.schema;
 
             // Add Schema to the Database
-            addSchemaToSysDB(user, database, schemaData);
+            addSchemaToSysDB(user, server, database, schemaData);
 
-            removeEndpoint(app, '/api/v1/' + user + '/' + database);
+            removeEndpoint(app, '/api/v1/' + user + '/' + server + '/' + database);
 
             const userData = {
                 username: user,
+                server: server,
                 database: database,
                 token: token
             };

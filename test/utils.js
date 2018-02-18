@@ -20,16 +20,25 @@ describe('utils', () => {
 
     describe('getUserFromUrl(url)', () => {
         it('should return the user', () => {
-            const url = '/api/v1/jsmith/posts';
+            const url = '/api/v1/jsmith/blog/posts';
             const user = 'jsmith';
 
             expect(utils.getUserFromUrl(url)).to.be.equal(user);
         });
     });
 
+    describe('getServerFromUrl(url)', () => {
+        it('should return the server', () => {
+            const url = '/api/v1/jsmith/blog/posts';
+            const server = 'blog';
+
+            expect(utils.getServerFromUrl(url)).to.be.equal(server);
+        });
+    });
+
     describe('getDBFromUrl(url)', () => {
         it('should return the database', () => {
-            const url = '/api/v1/jsmith/posts';
+            const url = '/api/v1/jsmith/blog/posts';
             const db = 'posts';
 
             expect(utils.getDBFromUrl(url)).to.be.equal(db);

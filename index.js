@@ -42,6 +42,7 @@ db.connectSysDB().then(async () => {
 
                     const userData = {
                         username: doc['username'],
+                        server: database.serverName,
                         database: database.name,
                         token: doc.token
                     };
