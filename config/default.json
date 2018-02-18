@@ -3,5 +3,32 @@
         "ip": "localhost",
         "port": 27017,
         "name": "mongoStratus"
+    },
+    "schema": {
+        "Query": {
+            "accounts": "[Accounts_Documents]"
+        },
+        "Accounts_Documents": {
+            "_id": "ID",
+            "username": "String",
+            "password": "String",
+            "salt": "String",
+            "email": "String",
+            "token": "String",
+            "databases": "[Database]"
+        },
+        "Database": {
+            "serverName": "String",
+            "name": "String",
+            "ip": "String",
+            "port": "Int",
+            "users": "[User]",
+            "type": "String",
+            "schema": "String"
+        },
+        "User": {
+            "username": "String",
+            "password": "String"
+        }
     }
 }
