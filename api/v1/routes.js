@@ -1,5 +1,8 @@
 const express = require('express');
 
+const expressGraphQL = require('express-graphql');
+const { buildSchema } = require('graphql');
+
 const logger = require('../../lib/logger');
 const graphqlGenerator = require('../../lib/graphql-generator');
 const removeEndpoint = require('../../lib/express-remove-endpoint');
@@ -8,6 +11,34 @@ const db = require('../../lib/db');
 const authMiddleware = require('../../lib/authMiddleware');
 
 const router = express.Router();
+
+const serverSchema = buildSchema(`
+    type Query {
+        getDatabases: [Database]
+        createDatabase (name: String!): String
+        dropDatabase (name: String!): String
+        getUsers: [User]
+        addUser (user: UserInput!): String
+        removeUser (username: String!): String
+        ping: Boolean
+    }
+    type Database {
+        name: String,
+        sizeOnDisk: Int,
+        empty: Boolean
+    }
+    input UserInput {
+        username: String,
+        password: String,
+        database: String,
+        roles: [String]
+    }
+    type User {
+        username: String,
+        database: String,
+        roles: [String]
+    }
+`);
 
 async function addSchemaToSysDB (username, serverName, dbName, schemaData) {
     try {
@@ -23,6 +54,118 @@ async function addSchemaToSysDB (username, serverName, dbName, schemaData) {
     }
     catch (err) {
         logger.log('error', err);
+    }
+}
+
+async function getServerRootValue (req) {
+    try {
+        const server = req.params.server;
+        const token = utils.getToken(req.get('Authorization'));
+
+        return {
+            getDatabases: async ()  => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        serverName: server,
+                        databaseName: 'admin'
+                    };
+                    return await db.getDatabases(dataReq);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            createDatabase: async ({ name }) => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        serverName: server,
+                        databaseName: name
+                    };
+                    return await db.createDatabase(dataReq);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            dropDatabase: async ({ name }) => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        serverName: server,
+                        databaseName: name
+                    };
+                    return await db.dropDatabase(dataReq);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            getUsers: async ()  => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        serverName: server,
+                        databaseName: 'admin'
+                    };
+                    return await db.getUsers(dataReq);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            addUser: async ({ user }) => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        serverName: server,
+                        databaseName: user.database
+                    };
+                    return await db.addUser(dataReq, user);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            removeUser: async ({ username }) => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        serverName: server,
+                        databaseName: 'admin'
+                    };
+                    return await db.removeUser(dataReq, username);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            ping: async () => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        serverName: server,
+                        databaseName: 'admin'
+                    };
+                    return await db.ping(dataReq);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            }
+        };
+    }
+    catch (err) {
+        logger.log('error', err);
+        return {};
     }
 }
 
@@ -58,6 +201,11 @@ const routes = function (app) {
             res.send(JSON.stringify({'error': 1, 'errorMessage': e}));
         }
     });
+
+    router.post('/:user/:server', authMiddleware, expressGraphQL(async (req) => ({
+        schema: serverSchema,
+        rootValue: await getServerRootValue(req)
+    })));
 
     // TODO: GraphQL Endpoints
     // /:user/:server
