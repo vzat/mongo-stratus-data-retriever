@@ -59,7 +59,14 @@ const routes = function (app) {
         }
     });
 
-    // TODO: Add endpoint to change the API token
+    // TODO: GraphQL Endpoints
+    // /:user/:server
+    // 1. Get all databases for a server
+    // 2. Add new database
+    // 3. Remove database
+
+    // /:user
+    // Change API endpoint
 
     return router;
 };
