@@ -37,7 +37,7 @@ db.connectSysDB().then(async () => {
             for (const dbNo in databases) {
                 const database = databases[dbNo];
 
-                if (database.schema !== undefined && database.schema !== '') {
+                if (database.schema !== undefined && database.schema !== null && database.schema !== '') {
                     const schemaData = await JSON.parse(database.schema);
 
                     const userData = {
