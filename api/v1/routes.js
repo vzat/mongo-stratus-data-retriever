@@ -15,12 +15,14 @@ const router = express.Router();
 const serverSchema = buildSchema(`
     type Query {
         getDatabases: [Database]
+        getUsers: [User]
+        ping: Boolean
+    }
+    type Mutation {
         createDatabase (name: String!): String
         dropDatabase (name: String!): String
-        getUsers: [User]
         addUser (user: UserInput!): String
         removeUser (username: String!): String
-        ping: Boolean
     }
     type Database {
         name: String,
