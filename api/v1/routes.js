@@ -182,9 +182,6 @@ const routes = function (app) {
             const token = utils.getToken(req.get('Authorization'));
             const schemaData = req.body.schema;
 
-            // Add Schema to the Database
-            addSchemaToSysDB(user, server, database, schemaData);
-
             removeEndpoint(app, '/api/v1/' + user + '/' + server + '/' + database);
 
             const userData = {
@@ -194,7 +191,14 @@ const routes = function (app) {
                 token: token
             };
 
-            graphqlGenerator.createEndpoint(app, '/api/v1/', userData, schemaData);
+            const error = await graphqlGenerator.createEndpoint(app, '/api/v1/', userData, schemaData);
+
+            if (error !== false) {
+                throw new Error(error);
+            }
+
+            // Add Schema to the Database
+            addSchemaToSysDB(user, server, database, schemaData);
 
             res.send(JSON.stringify({'error': 0}));
         }
