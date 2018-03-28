@@ -30,15 +30,23 @@ const serverSchema = buildSchema(`
         empty: Boolean
     }
     input UserInput {
-        username: String,
-        password: String,
-        database: String,
-        roles: [String]
+        user: String,
+        pass: String,
+        db: String,
+        roles: [RoleInput]
     }
     type User {
-        username: String,
-        database: String,
-        roles: [String]
+        user: String,
+        db: String,
+        roles: [Role]
+    }
+    input RoleInput {
+        role: String,
+        db: String
+    }
+    type Role {
+        role: String,
+        db: String
     }
 `);
 
@@ -126,7 +134,7 @@ async function getServerRootValue (req) {
                     const dataReq = {
                         token: token,
                         serverName: server,
-                        databaseName: user.database
+                        databaseName: user.db
                     };
                     return await db.addUser(dataReq, user);
                 }
@@ -212,12 +220,6 @@ const routes = function (app) {
         schema: serverSchema,
         rootValue: await getServerRootValue(req)
     })));
-
-    // TODO: GraphQL Endpoints
-    // /:user/:server
-    // 1. Get all databases for a server
-    // 2. Add new database
-    // 3. Remove database
 
     // /:user
     // Change API endpoint
