@@ -20,6 +20,7 @@ const serverSchema = buildSchema(`
     type Query {
         getDatabases: [Database]
         getUsers: [User]
+        getBackups: [Backup]
         ping: Boolean
     }
     type Mutation {
@@ -53,6 +54,10 @@ const serverSchema = buildSchema(`
         role: String,
         db: String
     }
+    type Backup {
+        timestamp: String,
+        size: Int
+    }
 `);
 
 async function addSchemaToSysDB (username, serverName, dbName, schemaData) {
@@ -70,6 +75,31 @@ async function addSchemaToSysDB (username, serverName, dbName, schemaData) {
     catch (err) {
         logger.log('error', err);
     }
+}
+
+async function createBackupDir (user, server) {
+    // Create backup dir
+    // const backupDir = __dirname + '../../../backup/';
+    const backupDir = path.join(__dirname, '../../backup');
+    if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir);
+    }
+
+    // Create user dir
+    // const userDir = __dirname + '../../../backup/' + user + '/';
+    const userDir = path.join(backupDir, user);
+    if (!fs.existsSync(userDir)) {
+        fs.mkdirSync(userDir);
+    }
+
+    // Create instance dir
+    // const instanceDir = __dirname + '../../../backup/' + user + '/' + server + '/';
+    const instanceDir = path.join(userDir, server);
+    if (!fs.existsSync(instanceDir)) {
+        fs.mkdirSync(instanceDir);
+    }
+
+    return instanceDir;
 }
 
 async function getServerRootValue (req) {
@@ -177,28 +207,40 @@ async function getServerRootValue (req) {
                     return err;
                 }
             },
+            getBackups: async () => {
+                try {
+                    // Read dir and delete oldest backup if there are more than 10
+                    const instanceDir = await createBackupDir(user, server);
+
+                    const timestamps = fs.readdirSync(instanceDir);
+
+                    let backups = [];
+                    for (let timestampNo = 0 ; timestampNo < timestamps.length ; timestampNo ++) {
+                        const stats = fs.statSync(path.join(instanceDir, timestamps[timestampNo]));
+
+                        // Get filename without extension
+                        const tarIndex = timestamps[timestampNo].indexOf('.tar');
+                        let timestamp = timestamps[timestampNo];
+                        if (tarIndex !== -1) {
+                            timestamp = timestamp.substr(0, tarIndex);
+                        }
+
+                        backups.push({
+                            timestamp: timestamp,
+                            size: stats.size
+                        });
+                    }
+
+                    return backups;
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
             backup: async () => {
                 try {
-                    // Create backup dir
-                    // const backupDir = __dirname + '../../../backup/';
-                    const backupDir = path.join(__dirname, '../../backup');
-                    if (!fs.existsSync(backupDir)) {
-                        fs.mkdirSync(backupDir);
-                    }
-
-                    // Create user dir
-                    // const userDir = __dirname + '../../../backup/' + user + '/';
-                    const userDir = path.join(backupDir, user);
-                    if (!fs.existsSync(userDir)) {
-                        fs.mkdirSync(userDir);
-                    }
-
-                    // Create instance dir
-                    // const instanceDir = __dirname + '../../../backup/' + user + '/' + server + '/';
-                    const instanceDir = path.join(userDir, server);
-                    if (!fs.existsSync(instanceDir)) {
-                        fs.mkdirSync(instanceDir);
-                    }
+                    const instanceDir = await createBackupDir(user, server);
 
                     // Read dir and delete oldest backup if there are more than 10
                     const backups = fs.readdirSync(instanceDir);
