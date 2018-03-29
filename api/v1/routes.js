@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const express = require('express');
 
 const expressGraphQL = require('express-graphql');
@@ -23,6 +25,7 @@ const serverSchema = buildSchema(`
         dropDatabase (name: String!): String
         addUser (user: UserInput!): String
         removeUser (username: String!): String
+        backup: Boolean
     }
     type Database {
         name: String,
@@ -69,6 +72,7 @@ async function addSchemaToSysDB (username, serverName, dbName, schemaData) {
 
 async function getServerRootValue (req) {
     try {
+        const user = req.params.user;
         const server = req.params.server;
         const token = utils.getToken(req.get('Authorization'));
 
@@ -165,6 +169,46 @@ async function getServerRootValue (req) {
                         databaseName: 'admin'
                     };
                     return await db.ping(dataReq);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            backup: async () => {
+                try {
+                    // Create backup dir
+                    const backupDir = __dirname + '../../../backup/';
+                    if (!fs.existsSync(backupDir)) {
+                        fs.mkdirSync(backupDir);
+                    }
+
+                    // Create user dir
+                    const userDir = __dirname + '../../../backup/' + user + '/';
+                    if (!fs.existsSync(userDir)) {
+                        fs.mkdirSync(userDir);
+                    }
+
+                    // Create instance dir
+                    const instanceDir = __dirname + '../../../backup/' + user + '/' + server + '/';
+                    if (!fs.existsSync(instanceDir)) {
+                        fs.mkdirSync(instanceDir);
+                    }
+
+                    // Read dir and delete oldest backup if more than 10
+                    const backups = fs.readdirSync(instanceDir);
+                    if (backups.length > 10) {
+                        fs.rmdirSync(instanceDir + '/' + backups[0]);
+                    }
+
+
+                    const dataReq = {
+                        token: token,
+                        username: user,
+                        serverName: server,
+                        databaseName: 'admin'
+                    };
+                    return await db.backup(dataReq);
                 }
                 catch (err) {
                     logger.log('error', err);
