@@ -29,6 +29,7 @@ const serverSchema = buildSchema(`
         addUser (user: UserInput!): String
         removeUser (username: String!): String
         backup: Boolean
+        restore (timestamp: String!): Boolean
     }
     type Database {
         name: String,
@@ -55,8 +56,7 @@ const serverSchema = buildSchema(`
         db: String
     }
     type Backup {
-        timestamp: String,
-        size: Int
+        timestamp: String
     }
 `);
 
@@ -216,18 +216,8 @@ async function getServerRootValue (req) {
 
                     let backups = [];
                     for (let timestampNo = 0 ; timestampNo < timestamps.length ; timestampNo ++) {
-                        const stats = fs.statSync(path.join(instanceDir, timestamps[timestampNo]));
-
-                        // Get filename without extension
-                        const tarIndex = timestamps[timestampNo].indexOf('.tar');
-                        let timestamp = timestamps[timestampNo];
-                        if (tarIndex !== -1) {
-                            timestamp = timestamp.substr(0, tarIndex);
-                        }
-
                         backups.push({
-                            timestamp: timestamp,
-                            size: stats.size
+                            timestamp: timestamps[timestampNo]
                         });
                     }
 
@@ -244,8 +234,8 @@ async function getServerRootValue (req) {
 
                     // Read dir and delete oldest backup if there are more than 10
                     const backups = fs.readdirSync(instanceDir);
-                    if (backups.length > 10) {
-                        rimraf(path.join(instanceDir, backups[0]), () => {});
+                    if (backups.length > 9) {
+                        rimraf.sync(path.join(instanceDir, backups[0]));
                     }
 
                     const dataReq = {
@@ -255,6 +245,34 @@ async function getServerRootValue (req) {
                         databaseName: 'admin'
                     };
                     return await db.backup(dataReq);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            restore: async ({ timestamp }) => {
+                try {
+                    const instanceDir = await createBackupDir(user, server);
+
+                    // Read dir and delete oldest backup if there are more than 10
+                    const backups = fs.readdirSync(instanceDir);
+                    if (backups.indexOf(timestamp) === -1) {
+                        return false;
+                    }
+
+                    const databases = fs.readdirSync(path.join(instanceDir, timestamp));
+                    if (databases.length === 0) {
+                        return false;
+                    }
+
+                    const dataReq = {
+                        token: token,
+                        username: user,
+                        serverName: server,
+                        databaseName: 'admin'
+                    };
+                    return await db.restore(dataReq, timestamp, databases);
                 }
                 catch (err) {
                     logger.log('error', err);
