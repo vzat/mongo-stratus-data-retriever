@@ -1,9 +1,11 @@
 const fs = require('fs');
+const path = require('path');
 
 const express = require('express');
 
 const expressGraphQL = require('express-graphql');
 const { buildSchema } = require('graphql');
+const rimraf = require('rimraf');
 
 const logger = require('../../lib/logger');
 const graphqlGenerator = require('../../lib/graphql-generator');
@@ -178,29 +180,31 @@ async function getServerRootValue (req) {
             backup: async () => {
                 try {
                     // Create backup dir
-                    const backupDir = __dirname + '../../../backup/';
+                    // const backupDir = __dirname + '../../../backup/';
+                    const backupDir = path.join(__dirname, '../../backup');
                     if (!fs.existsSync(backupDir)) {
                         fs.mkdirSync(backupDir);
                     }
 
                     // Create user dir
-                    const userDir = __dirname + '../../../backup/' + user + '/';
+                    // const userDir = __dirname + '../../../backup/' + user + '/';
+                    const userDir = path.join(backupDir, user);
                     if (!fs.existsSync(userDir)) {
                         fs.mkdirSync(userDir);
                     }
 
                     // Create instance dir
-                    const instanceDir = __dirname + '../../../backup/' + user + '/' + server + '/';
+                    // const instanceDir = __dirname + '../../../backup/' + user + '/' + server + '/';
+                    const instanceDir = path.join(userDir, server);
                     if (!fs.existsSync(instanceDir)) {
                         fs.mkdirSync(instanceDir);
                     }
 
-                    // Read dir and delete oldest backup if more than 10
+                    // Read dir and delete oldest backup if there are more than 10
                     const backups = fs.readdirSync(instanceDir);
                     if (backups.length > 10) {
-                        fs.rmdirSync(instanceDir + '/' + backups[0]);
+                        rimraf(path.join(instanceDir, backups[0]), () => {});
                     }
-
 
                     const dataReq = {
                         token: token,
