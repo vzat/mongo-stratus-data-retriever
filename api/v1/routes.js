@@ -22,6 +22,7 @@ const serverSchema = buildSchema(`
         getDatabases: [Database]
         getUsers: [User]
         getBackups: [Backup]
+        getReplicaSetStatus: ReplicaSetStatus
         ping: Boolean
     }
     type Mutation {
@@ -58,6 +59,17 @@ const serverSchema = buildSchema(`
     }
     type Backup {
         timestamp: String
+    }
+    type ReplicaSetStatus {
+        set: String,
+        members: [ReplicaSetMembers]
+    }
+    type ReplicaSetMembers {
+        _id: ID,
+        name: String,
+        health: Int,
+        state: Int,
+        stateStr: String
     }
 `);
 
@@ -283,6 +295,22 @@ async function getServerRootValue (req) {
                         databaseName: 'admin'
                     };
                     return await db.restore(dataReq, timestamp, databases);
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            },
+            getReplicaSetStatus: async () => {
+                try {
+                    const dataReq = {
+                        token: token,
+                        username: user,
+                        serverName: server,
+                        databaseName: 'admin'
+                    };
+
+                    return await db.getReplicaSetStatus(dataReq);
                 }
                 catch (err) {
                     logger.log('error', err);
