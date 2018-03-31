@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const express = require('express');
 
@@ -57,6 +58,15 @@ const serverSchema = buildSchema(`
     }
     type Backup {
         timestamp: String
+    }
+`);
+
+const userSchema = buildSchema(`
+    type Query {
+        getToken: String
+    }
+    type Mutation {
+        refreshToken: String
     }
 `);
 
@@ -287,6 +297,32 @@ async function getServerRootValue (req) {
     }
 }
 
+async function getUserRootValue (req) {
+    try {
+        const user = req.params.user;
+
+        return {
+            refreshToken: async () => {
+                try {
+                    const newToken = await crypto.randomBytes(16).toString('hex');
+
+                    await db.updateDocumentSysDB('accounts', {'username': user}, {$set: {'token': newToken}}, {});
+
+                    return newToken;
+                }
+                catch (err) {
+                    logger.log('error', err);
+                    return err;
+                }
+            }
+        };
+    }
+    catch (err) {
+        logger.log('error', err);
+        return {};
+    }
+}
+
 const routes = function (app) {
     router.put('/:user/:server/:database/schema', authMiddleware, async function (req, res) {
         res.setHeader('Content-Type', 'application/json');
@@ -329,8 +365,10 @@ const routes = function (app) {
         rootValue: await getServerRootValue(req)
     })));
 
-    // /:user
-    // Change API endpoint
+    router.post('/:user', authMiddleware, expressGraphQL(async (req) => ({
+        schema: userSchema,
+        rootValue: await getUserRootValue(req)
+    })));
 
     return router;
 };
