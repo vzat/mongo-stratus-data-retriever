@@ -14,6 +14,7 @@ const removeEndpoint = require('../../lib/express-remove-endpoint');
 const utils = require('../../lib/utils');
 const db = require('../../lib/db');
 const authMiddleware = require('../../lib/authMiddleware');
+const restAuthMiddleware = require('../../lib/restAuthMiddleware');
 
 const router = express.Router();
 
@@ -397,6 +398,197 @@ const routes = function (app) {
         schema: userSchema,
         rootValue: await getUserRootValue(req)
     })));
+
+    // TODO: REST API
+
+    // Get Databases (Low Priority)
+    // Get Collections
+    // Get Documents from Collection
+
+    // Create Collection
+    // Insert Documents
+
+    // Run Command
+
+    router.get('/:user/:instance/databases', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const token = utils.getToken(req.get('Authorization'));
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: 'admin'
+            };
+
+            const dbs = await db.getDatabases(dataReq);
+
+            if (dbs) {
+                res.send(JSON.stringify({'ok': 1, 'data': dbs}));
+            }
+            else {
+                throw new Error('Cannot get databases');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.get('/:user/:instance/:database/collections', authMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const token = utils.getToken(req.get('Authorization'));
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            const collections = await db.getCollections(dataReq);
+
+            if (collections) {
+                res.send(JSON.stringify({'ok': 1, 'data': collections}));
+            }
+            else {
+                throw new Error('Cannot get collections');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.get('/:user/:instance/:database/:collection/documents', authMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const collection = req.params.collection;
+            const token = utils.getToken(req.get('Authorization'));
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            const docs = await db.getDocuments(dataReq, collection, {}, {});
+
+            if (docs) {
+                res.send(JSON.stringify({'ok': 1, 'data': docs}));
+            }
+            else {
+                throw new Error('Cannot get documents');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.post('/:user/:instance/:database/collection', authMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const collection = req.body.collection;
+            const token = utils.getToken(req.get('Authorization'));
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            const success = await db.createCollection(dataReq, collection);
+
+            if (success) {
+                res.send(JSON.stringify({'ok': 1}));
+            }
+            else {
+                throw new Error('Cannot create collection');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.post('/:user/:instance/:database/:collection/documents', authMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const collection = req.params.collection;
+            const documents = req.body.documents;
+            const token = utils.getToken(req.get('Authorization'));
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            const success = await db.insertDocuments(dataReq, collection, documents);
+
+            if (success) {
+                res.send(JSON.stringify({'ok': 1}));
+            }
+            else {
+                throw new Error('Cannot create collection');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.post('/:user/:instance/:database/command', authMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const command = req.body.command;
+            const token = utils.getToken(req.get('Authorization'));
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            const result = db.runCommand(dataReq, JSON.stringify(command));
+
+            if (result) {
+                res.send(JSON.stringify({'ok': 1, 'data': result}));
+            }
+            else {
+                throw new Error('Cannot create collection');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
 
     return router;
 };
