@@ -575,7 +575,7 @@ const routes = function (app) {
                 databaseName: database
             };
 
-            const result = db.runCommand(dataReq, JSON.stringify(command));
+            const result = await db.runCommand(dataReq, command);
 
             if (result) {
                 res.send(JSON.stringify({'ok': 1, 'data': result}));
