@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('cookie-session');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
@@ -17,6 +18,10 @@ db.connectSysDB().then(async () => {
     app.use(cors());
     app.use(bodyParser.json());
     app.use(morgan('combined'));
+    app.use(session({
+        name: 'session',
+        secret: process.env.secret || 'MongoStratus'
+    }));
 
     // Debug only
     app.get('/', function (req, res) {

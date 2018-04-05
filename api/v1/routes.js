@@ -7,6 +7,7 @@ const express = require('express');
 const expressGraphQL = require('express-graphql');
 const { buildSchema } = require('graphql');
 const rimraf = require('rimraf');
+const ObjectID = require('mongodb').ObjectID;
 
 const logger = require('../../lib/logger');
 const graphqlGenerator = require('../../lib/graphql-generator');
@@ -352,6 +353,16 @@ async function getUserRootValue (req) {
     }
 }
 
+function getToken (req) {
+    const token = utils.getToken(req.get('Authorization'));
+
+    if (!token && req.session && req.session.username && req.session.token) {
+        return req.session.token;
+    }
+
+    return token;
+}
+
 const routes = function (app) {
     router.put('/:user/:server/:database/schema', authMiddleware, async function (req, res) {
         res.setHeader('Content-Type', 'application/json');
@@ -416,7 +427,7 @@ const routes = function (app) {
         try {
             const user = req.params.user;
             const instance = req.params.instance;
-            const token = utils.getToken(req.get('Authorization'));
+            const token = getToken(req);
 
             const dataReq = {
                 token: token,
@@ -440,12 +451,12 @@ const routes = function (app) {
         }
     });
 
-    router.get('/:user/:instance/:database/collections', authMiddleware, async (req, res) => {
+    router.get('/:user/:instance/:database/collections', restAuthMiddleware, async (req, res) => {
         try {
             const user = req.params.user;
             const instance = req.params.instance;
             const database = req.params.database;
-            const token = utils.getToken(req.get('Authorization'));
+            const token = getToken(req);
 
             const dataReq = {
                 token: token,
@@ -469,13 +480,13 @@ const routes = function (app) {
         }
     });
 
-    router.get('/:user/:instance/:database/:collection/documents', authMiddleware, async (req, res) => {
+    router.get('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
         try {
             const user = req.params.user;
             const instance = req.params.instance;
             const database = req.params.database;
             const collection = req.params.collection;
-            const token = utils.getToken(req.get('Authorization'));
+            const token = getToken(req);
 
             const dataReq = {
                 token: token,
@@ -499,13 +510,13 @@ const routes = function (app) {
         }
     });
 
-    router.post('/:user/:instance/:database/collection', authMiddleware, async (req, res) => {
+    router.post('/:user/:instance/:database/collection', restAuthMiddleware, async (req, res) => {
         try {
             const user = req.params.user;
             const instance = req.params.instance;
             const database = req.params.database;
             const collection = req.body.collection;
-            const token = utils.getToken(req.get('Authorization'));
+            const token = getToken(req);
 
             const dataReq = {
                 token: token,
@@ -529,14 +540,44 @@ const routes = function (app) {
         }
     });
 
-    router.post('/:user/:instance/:database/:collection/documents', authMiddleware, async (req, res) => {
+    router.delete('/:user/:instance/:database/collection', restAuthMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const collection = req.body.collection;
+            const token = getToken(req);
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            const success = await db.deleteCollection(dataReq, collection);
+
+            if (success) {
+                res.send(JSON.stringify({'ok': 1}));
+            }
+            else {
+                throw new Error('Cannot delete collection');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.post('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
         try {
             const user = req.params.user;
             const instance = req.params.instance;
             const database = req.params.database;
             const collection = req.params.collection;
             const documents = req.body.documents;
-            const token = utils.getToken(req.get('Authorization'));
+            const token = getToken(req);
 
             const dataReq = {
                 token: token,
@@ -560,13 +601,97 @@ const routes = function (app) {
         }
     });
 
-    router.post('/:user/:instance/:database/command', authMiddleware, async (req, res) => {
+    router.delete('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const collection = req.params.collection;
+            const ids = req.body.ids;
+            const token = getToken(req);
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            if (!(ids instanceof Array)) {
+                throw new Error('Invalid field "ids"');
+            }
+
+            let success;
+            for (let idNo = 0 ; idNo < ids.length ; idNo ++) {
+                let docs = await db.deleteDocuments(dataReq, collection, {'_id': ObjectID(ids[idNo])}, {});
+                if (docs && docs.length > 0) {
+                    success = true;
+                }
+            }
+
+            if (success) {
+                res.send(JSON.stringify({'ok': 1}));
+            }
+            else {
+                throw new Error('Cannot delete documents');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.put('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
+        try {
+            const user = req.params.user;
+            const instance = req.params.instance;
+            const database = req.params.database;
+            const collection = req.params.collection;
+            const ids = req.body.ids;
+            const documents = req.body.documents;
+            const token = getToken(req);
+
+            const dataReq = {
+                token: token,
+                username: user,
+                serverName: instance,
+                databaseName: database
+            };
+
+            if (!(ids instanceof Array) || !(documents instanceof Array) || ids.length !== documents.length) {
+                throw new Error('Invalid field number of ids and/or documents');
+            }
+
+            let success;
+            for (let idNo = 0 ; idNo < ids.length ; idNo ++) {
+
+                let docs = await db.updateDocuments(dataReq, collection, {'_id': ObjectID(ids[idNo])}, documents[idNo]);
+                if (docs && docs.length > 0) {
+                    success = true;
+                }
+            }
+
+            if (success) {
+                res.send(JSON.stringify({'ok': 1}));
+            }
+            else {
+                throw new Error('Cannot update documents');
+            }
+        }
+        catch (err) {
+            logger.log('error', err);
+            res.send(JSON.stringify({'ok': 0, 'error': err}));
+        }
+    });
+
+    router.post('/:user/:instance/:database/command', restAuthMiddleware, async (req, res) => {
         try {
             const user = req.params.user;
             const instance = req.params.instance;
             const database = req.params.database;
             const command = req.body.command;
-            const token = utils.getToken(req.get('Authorization'));
+            const token = getToken(req);
 
             const dataReq = {
                 token: token,
