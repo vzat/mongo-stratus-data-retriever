@@ -1,7 +1,10 @@
 const express = require('express');
+const session = require('cookie-session');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const cron = require('node-cron');
+const request = require('request-promise');
 
 let app = express();
 
@@ -15,6 +18,10 @@ db.connectSysDB().then(async () => {
     app.use(cors());
     app.use(bodyParser.json());
     app.use(morgan('combined'));
+    app.use(session({
+        name: 'session',
+        secret: process.env.secret || 'MongoStratus'
+    }));
 
     // Debug only
     app.get('/', function (req, res) {
@@ -37,7 +44,7 @@ db.connectSysDB().then(async () => {
             for (const dbNo in databases) {
                 const database = databases[dbNo];
 
-                if (database.schema !== undefined && database.schema !== '') {
+                if (database.schema !== undefined && database.schema !== null && database.schema !== '') {
                     const schemaData = await JSON.parse(database.schema);
 
                     const userData = {
@@ -54,6 +61,63 @@ db.connectSysDB().then(async () => {
     }
 
     logger.log('info', 'API endpoints have been restored');
+
+    // Backup Scheduled Instances
+    cron.schedule('0 * * * *', async () => {
+        const docs = await db.getDocumentsSysDB('backups', {}, {'projection': {'username': 1, 'instance': 1, 'time': 1}});
+        for (const docNo in docs) {
+            const doc = docs[docNo];
+
+            const comp = doc.time.split(' ');
+            if (doc.time !== '* * * * *' && comp.length === 5) {
+                let backup = false;
+                const currentDate = new Date();
+
+                if (comp[1] == currentDate.getHours()) {
+                    // Daily
+                    if (comp[2] == '*' && comp[4] == '*') {
+                        backup = true;
+                    }
+
+                    // Weekly
+                    if (comp[4] == currentDate.getDay()) {
+                        backup = true;
+                    }
+
+                    // Monthly
+                    if (comp[2] == currentDate.getDate()) {
+                        backup = true;
+                    }
+                }
+
+                if (backup === true) {
+                    const accounts = await db.getDocumentsSysDB('accounts', {'username': doc.username}, {'projection': {'username': 1, 'token': 1}});
+
+                    if (accounts[0].username === doc.username) {
+                        const mutation = `mutation Backup {
+                            backup
+                        }`;
+
+                        let options = {
+                            method: 'POST',
+                            uri: 'http://localhost:5000' + '/api/v1/' + doc.username + '/' + doc.instance,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + accounts[0].token
+                            },
+                            body: JSON.stringify({
+                                query: mutation
+                            })
+                        };
+
+                        request.post(options);
+
+                        logger.log('info', 'Backing up ' + doc.username + '\'s instance ' + doc.instance);
+                    }
+                }
+            }
+        }
+    });
 });
 
 module.exports = app;
