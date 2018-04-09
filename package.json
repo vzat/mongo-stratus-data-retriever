@@ -4,7 +4,7 @@
   "description": "MongoDB Data Retriever",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "export NODE_ENV=production && pm2 start index.js",
     "lint": "node ./node_modules/eslint/bin/eslint **/*.js",
     "test": "mocha"
   },

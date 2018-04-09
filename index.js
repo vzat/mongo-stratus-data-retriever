@@ -20,7 +20,11 @@ db.connectSysDB().then(async () => {
     app.use(morgan('combined'));
     app.use(session({
         name: 'session',
-        secret: process.env.secret || 'MongoStratus'
+        secret: process.env.secret || 'MongoStratus',
+	domain: '.mongostratus.me',
+	cookie: {
+		domain: '.mongostratus.me'
+	}
     }));
 
     // Debug only
