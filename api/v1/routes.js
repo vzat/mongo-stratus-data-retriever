@@ -336,7 +336,7 @@ async function getUserRootValue (req) {
                 try {
                     const newToken = await crypto.randomBytes(16).toString('hex');
 
-                    await db.updateDocumentSysDB('accounts', {'username': user}, {$set: {'token': newToken}}, {});
+                    await db.updateDocumentSysDB('accounts', {'username': user}, {'token': newToken}, {});
 
                     return newToken;
                 }
