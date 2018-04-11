@@ -6,7 +6,9 @@ warnings_are_errors: false
 
 services: mongodb
 
-before-script:
+before_script:
+  - export NODE_ENV=test
+  - sleep 15
   - mongo mongoStratus --eval 'db.accounts.insert({username: "admin",databases: [{ip: "localhost",port: 27017}]});'
 
 scripts:
