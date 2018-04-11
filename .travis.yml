@@ -7,7 +7,7 @@ warnings_are_errors: false
 services: mongodb
 
 env:
-  - NODE_ENV=dev
+  - NODE_ENV=test
 
 before_script:
   - mongo mongoStratus --eval 'db.accounts.insert({username:"admin",token:"z321",databases:[{serverName:"mongoStratus",ip:"localhost",port:27017}]});'
