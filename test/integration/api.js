@@ -11,6 +11,8 @@ describe('API', () => {
                     .get('/api/v1/admin/mongoStratus/databases')
                     .set('Authorization', 'Bearer z321')
                     .end((err, res) => {
+                        console.log(err);
+                        console.log(res.body);
                         expect(err).to.equal(null);
                         expect(res.statusCode).to.equal(200);
                         expect(res).to.have.property('body');
