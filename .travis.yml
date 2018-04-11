@@ -11,7 +11,7 @@ env:
 
 before_script:
   - sleep 15
-  - mongo mongoStratus --eval 'db.accounts.insert({username:"admin",databases:[{ip:"localhost",port:27017}]});'
+  - mongo mongoStratus --eval 'db.accounts.insert({username:"admin",token:"test",databases:[{ip:"localhost",port:27017}]});'
 
 script:
   - npm test

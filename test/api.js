@@ -9,7 +9,7 @@ describe('API', () => {
             it('should get all the databases', (done) => {
                 request(app)
                     .get('/api/v1/admin/mongoStratus/databases')
-                    .set('Authorization', 'Bearer z321')
+                    .set('Authorization', 'Bearer test')
                     .end((err, res) => {
                         console.log(err);
                         console.log(res.body);
