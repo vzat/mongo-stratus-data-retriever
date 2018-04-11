@@ -7,11 +7,10 @@ warnings_are_errors: false
 services: mongodb
 
 env:
-  - NODE_ENV=test
+  - NODE_ENV=dev
 
 before_script:
-  - sleep 15
-  - mongo mongoStratus --eval 'db.accounts.insert({username:"admin",token:"test",databases:[{ip:"localhost",port:27017}]});'
+  - mongo mongoStratus --eval 'db.accounts.insert({username:"admin",token:"z321",databases:[{ip:"localhost",port:27017}]});'
 
 script:
   - npm test

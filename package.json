@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "lint": "node ./node_modules/eslint/bin/eslint **/*.js",
-    "test": "mocha"
+    "test": "mocha --exit"
   },
   "repository": {
     "type": "git",
