@@ -8,6 +8,7 @@ services: mongodb
 
 before-script:
   - sleep 15
+    - mongo mongoStratus --eval 'db.accounts.insert({username: "admin",databases: [{ip: "localhost",port: 27017}]})'
 
 scripts:
   - npm run lint

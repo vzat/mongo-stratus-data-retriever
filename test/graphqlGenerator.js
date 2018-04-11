@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 
-const graphqlSchema = require('../../lib/graphql-generator/schema.js');
+const graphqlSchema = require('../lib/graphql-generator/schema.js');
 
 const fakeSchema = {
     'Query': {

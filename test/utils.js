@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 const config = require('config');
 
-const utils = require('../../lib/utils');
+const utils = require('../lib/utils');
 
 describe('utils', () => {
     describe('getToken(auth)', () => {
