@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "lint": "node ./node_modules/eslint/bin/eslint **/*.js",
-    "test": "mocha"
+    "test-unit": "mocha test/unit",
+    "test-integration": "mocha test/integration"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "chai": "4.1.2",
     "eslint": "4.13.1",
-    "mocha": "5.0.0"
+    "mocha": "5.0.0",
+    "supertest": "^3.0.0"
   }
 }
