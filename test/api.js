@@ -35,7 +35,7 @@ describe('API', () => {
                         expect(res.body).to.have.property('ok');
                         expect(res.body.ok).to.be.equal(1);
                         expect(res.body).to.have.property('data');
-                        expect(res.body.data.length).to.be.above(1);
+                        expect(res.body.data.length).to.be.above(0);
                         done();
                     });
             });
