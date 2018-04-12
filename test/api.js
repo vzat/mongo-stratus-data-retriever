@@ -106,8 +106,8 @@ describe('API', () => {
             });
         });
 
-        describe('POST /api/v1/<user>/<instance>/<database>/<collection>/documents', () => {
-            it('should insert a document', (done) => {
+        describe('PUT /api/v1/<user>/<instance>/<database>/<collection>/documents', () => {
+            it('should modify a document', (done) => {
                 request(app)
                     .put('/api/v1/admin/mongoStratus/mongoStratus/test-collection/documents')
                     .set('Authorization', 'Bearer z321')
