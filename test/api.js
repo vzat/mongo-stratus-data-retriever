@@ -167,6 +167,123 @@ describe('API', () => {
                     });
             });
         });
+    });
 
+    describe('GraphQL', () => {
+        describe('POST /api/v1/<user>', () => {
+            it('should exist and contain Query operations', (done) => {
+                request(app)
+                    .post('/api/v1/admin')
+                    .set('Authorization', 'Bearer z321')
+                    .set('Content-Type', 'application/json')
+                    .send({
+                        query: `{
+                          __type(name: "Query") {
+                            name
+                            fields {
+                              name
+                            }
+                          }
+                        }`
+                    })
+                    .end((err, res) => {
+                        expect(err).to.equal(null);
+                        expect(res.statusCode).to.equal(200);
+                        expect(res).to.have.property('body');
+                        expect(res.body).to.have.property('data');
+                        expect(res.body.data).to.have.property('__type');
+                        expect(res.body.data.__type).to.have.property('fields');
+                        expect(res.body.data.__type.fields.length).to.be.above(0);
+                        done();
+                    });
+            });
+        });
+
+        describe('POST /api/v1/<user>', () => {
+            it('should exist and contain Mutation operations', (done) => {
+                request(app)
+                    .post('/api/v1/admin')
+                    .set('Authorization', 'Bearer z321')
+                    .set('Content-Type', 'application/json')
+                    .send({
+                        query: `{
+                          __type(name: "Mutation") {
+                            name
+                            fields {
+                              name
+                            }
+                          }
+                        }`
+                    })
+                    .end((err, res) => {
+                        expect(err).to.equal(null);
+                        expect(res.statusCode).to.equal(200);
+                        expect(res).to.have.property('body');
+                        expect(res.body).to.have.property('data');
+                        expect(res.body.data).to.have.property('__type');
+                        expect(res.body.data.__type).to.have.property('fields');
+                        expect(res.body.data.__type.fields.length).to.be.above(0);
+                        done();
+                    });
+            });
+        });
+
+        describe('POST /api/v1/<user>/<instance>', () => {
+            it('should exist and contain Query operations', (done) => {
+                request(app)
+                    .post('/api/v1/admin/mongoStratus')
+                    .set('Authorization', 'Bearer z321')
+                    .set('Content-Type', 'application/json')
+                    .send({
+                        query: `{
+                          __type(name: "Query") {
+                            name
+                            fields {
+                              name
+                            }
+                          }
+                        }`
+                    })
+                    .end((err, res) => {
+                        expect(err).to.equal(null);
+                        expect(res.statusCode).to.equal(200);
+                        expect(res).to.have.property('body');
+                        expect(res.body).to.have.property('data');
+                        expect(res.body.data).to.have.property('__type');
+                        expect(res.body.data.__type).to.have.property('fields');
+                        expect(res.body.data.__type.fields.length).to.be.above(0);
+                        done();
+                    });
+            });
+        });
+
+        describe('POST /api/v1/<user>/<instance>', () => {
+            it('should exist and contain Mutation operations', (done) => {
+                request(app)
+                    .post('/api/v1/admin/mongoStratus')
+                    .set('Authorization', 'Bearer z321')
+                    .set('Content-Type', 'application/json')
+                    .send({
+                        query: `{
+                          __type(name: "Mutation") {
+                            name
+                            fields {
+                              name
+                            }
+                          }
+                        }`
+                    })
+                    .end((err, res) => {
+                        expect(err).to.equal(null);
+                        expect(res.statusCode).to.equal(200);
+                        expect(res).to.have.property('body');
+                        expect(res.body).to.have.property('data');
+                        expect(res.body.data).to.have.property('__type');
+                        expect(res.body.data.__type).to.have.property('fields');
+                        expect(res.body.data.__type.fields.length).to.be.above(0);
+                        done();
+                    });
+            });
+        });
     });
 });
