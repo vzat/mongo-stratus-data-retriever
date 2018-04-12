@@ -699,38 +699,6 @@ const routes = function (app) {
         }
     });
 
-    router.post('/:user/:instance/:database/command', restAuthMiddleware, async (req, res) => {
-        res.setHeader('Content-Type', 'application/json');
-        
-        try {
-            const user = req.params.user;
-            const instance = req.params.instance;
-            const database = req.params.database;
-            const command = req.body.command;
-            const token = getToken(req);
-
-            const dataReq = {
-                token: token,
-                username: user,
-                serverName: instance,
-                databaseName: database
-            };
-
-            const result = await db.runCommand(dataReq, command);
-
-            if (result) {
-                res.send(JSON.stringify({'ok': 1, 'data': result}));
-            }
-            else {
-                throw new Error('Cannot create collection');
-            }
-        }
-        catch (err) {
-            logger.log('error', err);
-            res.send(JSON.stringify({'ok': 0, 'error': err}));
-        }
-    });
-
     return router;
 };
 
