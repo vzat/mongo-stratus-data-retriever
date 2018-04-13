@@ -452,6 +452,8 @@ const routes = function (app) {
     });
 
     router.get('/:user/:instance/:database/collections', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
         try {
             const user = req.params.user;
             const instance = req.params.instance;
@@ -481,6 +483,8 @@ const routes = function (app) {
     });
 
     router.get('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
         try {
             const user = req.params.user;
             const instance = req.params.instance;
@@ -511,6 +515,8 @@ const routes = function (app) {
     });
 
     router.post('/:user/:instance/:database/collection', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
         try {
             const user = req.params.user;
             const instance = req.params.instance;
@@ -541,6 +547,8 @@ const routes = function (app) {
     });
 
     router.delete('/:user/:instance/:database/collection', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
         try {
             const user = req.params.user;
             const instance = req.params.instance;
@@ -571,6 +579,8 @@ const routes = function (app) {
     });
 
     router.post('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
         try {
             const user = req.params.user;
             const instance = req.params.instance;
@@ -602,6 +612,8 @@ const routes = function (app) {
     });
 
     router.delete('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
         try {
             const user = req.params.user;
             const instance = req.params.instance;
@@ -643,6 +655,8 @@ const routes = function (app) {
     });
 
     router.put('/:user/:instance/:database/:collection/documents', restAuthMiddleware, async (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+
         try {
             const user = req.params.user;
             const instance = req.params.instance;
@@ -677,36 +691,6 @@ const routes = function (app) {
             }
             else {
                 throw new Error('Cannot update documents');
-            }
-        }
-        catch (err) {
-            logger.log('error', err);
-            res.send(JSON.stringify({'ok': 0, 'error': err}));
-        }
-    });
-
-    router.post('/:user/:instance/:database/command', restAuthMiddleware, async (req, res) => {
-        try {
-            const user = req.params.user;
-            const instance = req.params.instance;
-            const database = req.params.database;
-            const command = req.body.command;
-            const token = getToken(req);
-
-            const dataReq = {
-                token: token,
-                username: user,
-                serverName: instance,
-                databaseName: database
-            };
-
-            const result = await db.runCommand(dataReq, command);
-
-            if (result) {
-                res.send(JSON.stringify({'ok': 1, 'data': result}));
-            }
-            else {
-                throw new Error('Cannot create collection');
             }
         }
         catch (err) {
