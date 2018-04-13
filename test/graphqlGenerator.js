@@ -85,10 +85,10 @@ input Collection2_DocumentInput_Root {
 
 describe('GraphQL-Generator', () => {
     describe('schema.generate(json)', () => {
-        it('should generate a valid GraphQL schema', () => {
+        it('should generate a valid GraphQL schema', (done) => {
             const schema = graphqlSchema.generate(fakeSchema);
-
             expect(schema).to.be.equal(correctSchema);
+            done();
         });
     });
 });
